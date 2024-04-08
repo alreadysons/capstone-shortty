@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
-from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config("SECRET_KEY")
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -79,11 +78,11 @@ WSGI_APPLICATION = "shortty.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": config("DATABASE_NAME"),  # Here
-        "USER": config("DATABASE_USERNAME"),  # Here
-        "PASSWORD": config("DATABASE_PASSWORD"),  # Here
-        "HOST": config("DATABASE_HOST"),  # Here
-        "PORT": config("DATABASE_PORT", cast=int),  # Here
+        "NAME": os.environ.get("DATABASE_NAME"),  # Here
+        "USER": os.environ.get("DATABASE_USERNAME"),  # Here
+        "PASSWORD": os.environ.get("DATABASE_PASSWORD"),  # Here
+        "HOST": os.environ.get("DATABASE_HOST"),  # Here
+        "PORT": os.environ.get("DATABASE_PORT", cast=int),  # Here
         "OPTIONS" : {
             'init_command' : 'SET sql_mod="STRICT_TRANS_TABELS"'
         }
