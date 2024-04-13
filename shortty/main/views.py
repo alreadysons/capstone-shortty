@@ -34,3 +34,23 @@ def signup_view(request): # 회원가입
     else:
         form = UserCreationForm()
     return render(request, 'main/signup.html', {'form': form})
+
+import random
+from django.shortcuts import redirect
+
+import hashlib
+import datetime
+from django.shortcuts import redirect
+
+def anonymous_login_view(request):
+    # IP 주소 얻기
+    ip_address = request.META.get('REMOTE_ADDR', '0.0.0.0')  
+    # 현재 시각을 문자열로 변환
+    now = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+    # IP 주소와 현재 시각을 결합
+    raw_id = f'{ip_address}-{now}'
+    # 해시 함수를 사용하여 ID 생성
+    hashed_id = hashlib.sha256(raw_id.encode()).hexdigest()[:8]  # 해시 후 첫 8자리만 사용
+    # 세션에 저장
+    request.session['anonymous_id'] = f'익명{hashed_id}'
+    return redirect('main:main')  # 리다이렉션

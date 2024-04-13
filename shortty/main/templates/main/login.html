@@ -1,17 +1,25 @@
-<!-- templates/login.html -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login</title>
   </head>
   <body>
-    <h2>Login</h2>
-    <form method="post">
+    <h1>Login Page</h1>
+    <!-- 로그인 폼 -->
+    <form method="post" action="{% url 'main:login' %}">
       {% csrf_token %} {{ form.as_p }}
-
       <button type="submit">Login</button>
-      <a href="{% url 'main:signup' %}">Sign up</a>
-      <!-- 회원 가입 링크-->
+    </form>
+
+    <!-- 회원 가입 버튼 -->
+    <a href="{% url 'main:signup' %}">Sign Up</a>
+
+    <!-- 익명으로 접속 버튼 -->
+    <form method="post" action="{% url 'main:anonymous_login' %}">
+      {% csrf_token %}
+      <button type="submit">Browse Anonymously</button>
     </form>
   </body>
 </html>
