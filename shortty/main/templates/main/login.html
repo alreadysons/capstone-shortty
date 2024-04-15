@@ -14,8 +14,10 @@
     </form>
 
     <!-- 회원 가입 버튼 -->
-    <a href="{% url 'main:signup' %}">Sign Up</a>
-
+    <form method="post" action="{% url 'main:signup' %}">
+      {% csrf_token %}
+      <button type="submit">signup</button>
+    </form>
     <!-- 익명으로 접속 버튼 -->
     <form method="post" action="{% url 'main:anonymous_login' %}">
       {% csrf_token %}

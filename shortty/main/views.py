@@ -35,7 +35,6 @@ def signup_view(request): # 회원가입
         form = UserCreationForm()
     return render(request, 'main/signup.html', {'form': form})
 
-import random
 from django.shortcuts import redirect
 
 import hashlib
@@ -54,3 +53,10 @@ def anonymous_login_view(request):
     # 세션에 저장
     request.session['anonymous_id'] = f'익명{hashed_id}'
     return redirect('main:main')  # 리다이렉션
+
+
+def chatPage(request, *args, **kwargs):
+    if not request.user.is_authenticated:
+        return redirect("main:main")
+    context = {}
+    return render(request, "main/chat.html", context)

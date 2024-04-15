@@ -10,5 +10,9 @@
       Welcome {% if request.user.is_authenticated %} {{ request.user.username }}
       {% else %} {{ request.session.anonymous_id|default:"Guest" }} {% endif %}
     </h1>
+    <form method="post" action="{% url 'main:chat' %}">
+      {% csrf_token %}
+      <button type="submit">chat</button>
+    </form>
   </body>
 </html>
