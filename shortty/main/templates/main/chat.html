@@ -3,9 +3,10 @@
   <body>
     <center>
       <h1>
-        Hello , Welcome to my chat site ! {% if request.user.is_authenticated %}
-        {{ request.user.username }} {% else %} {{
-        request.session.anonymous_id|default:"Guest" }} {% endif %}
+        Hello, Welcome to my chat site! 
+        {% if request.user.is_authenticated %}
+        {{ request.user.username }}{% else %}
+        {{request.session.anonymous_id|default:"Guest" }}{% endif %}
       </h1>
     </center>
     <br />
@@ -22,6 +23,7 @@
       <br />
     </div>
     <script>
+      const username = "{% if request.user.is_authenticated %}{{ request.user.username }}{% else %}{{ request.session.anonymous_id|default:'Guest' }}{% endif %}";
       const chatSocket = new WebSocket("ws://" + window.location.host + "/");
       chatSocket.onopen = function (e) {
         console.log("The connection was setup successfully !");
@@ -36,15 +38,10 @@
         }
       };
       document.querySelector("#id_message_send_button").onclick = function (e) {
-        var messageInput = document.querySelector(
-          "#id_message_send_input"
-        ).value;
-        chatSocket.send(
-          JSON.stringify({
-            message: messageInput,
-            username: "{{request.user.username}}",
-          })
-        );
+        const messageInput = document.querySelector("#id_message_send_input");
+        const message = messageInput.value;
+        chatSocket.send(JSON.stringify({ message: message, username: username }));
+        messageInput.value = '';
       };
       chatSocket.onmessage = function (e) {
         const data = JSON.parse(e.data);

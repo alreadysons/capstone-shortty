@@ -56,7 +56,8 @@ def anonymous_login_view(request):
 
 
 def chatPage(request, *args, **kwargs):
-    if not request.user.is_authenticated:
-        return redirect("main:main")
-    context = {}
+    # 로그인 상태와 상관없이 채팅 페이지 접근 허용
+    context = {
+        'username': request.session.get('anonymous_id', 'Guest') if not request.user.is_authenticated else request.user.username
+    }
     return render(request, "main/chat.html", context)
