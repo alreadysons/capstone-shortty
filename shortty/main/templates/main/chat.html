@@ -6,7 +6,7 @@
         Hello, Welcome to my chat site! 
         {% if request.user.is_authenticated %}
         {{ request.user.username }}{% else %}
-        {{request.session.anonymous_id|default:"Guest" }}{% endif %}
+        {{ request.session.anonymous_id|default:"Guest" }}{% endif %}
       </h1>
     </center>
     <br />
@@ -46,9 +46,9 @@
       chatSocket.onmessage = function (e) {
         const data = JSON.parse(e.data);
         var div = document.createElement("div");
-        div.innerHTML = data.username + " : " + data.message;
-        document.querySelector("#id_message_send_input").value = "";
+        div.innerHTML = `<strong>${data.username}</strong>: ${data.message} <small>[${data.timestamp}]</small>`;
         document.querySelector("#id_chat_item_container").appendChild(div);
+        document.querySelector("#id_message_send_input").value = "";
       };
     </script>
   </body>
