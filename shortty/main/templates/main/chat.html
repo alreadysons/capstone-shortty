@@ -1,30 +1,44 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <style>
+      #id_chat_log_container {
+        height: 400px; /* 원하는 높이로 설정 */
+        overflow-y: auto; /* 세로 스크롤을 위한 설정 */
+        border: 1px solid #ccc; /* 컨테이너의 경계를 나타내기 위한 설정 */
+        padding: 10px;
+        margin-bottom: 20px;
+        background-color: #f9f9f9; /* 배경색 설정 */
+      }
+    </style>
+  </head>
   <body>
     <center>
       <h1>
-        Hello, Welcome to my chat site! 
-        {% if request.user.is_authenticated %}
-        {{ request.user.username }}{% else %}
-        {{ request.session.anonymous_id|default:"Guest" }}{% endif %}
+        Hello, Welcome to my chat site! {% if request.user.is_authenticated %}
+        {{ request.user.username }}{% else %}{{
+        request.session.anonymous_id|default:"Guest" }}{% endif %}
       </h1>
     </center>
     <br />
-
-    <div
-      class="chat__item__container"
-      id="id_chat_item_container"
-      style="font-size: 20px"
-    >
-      <br />
+    <div id="id_chat_log_container">
+      <!-- 서버에서 로드한 메시지를 표시 -->
+      {% for message in messages %}
+      <div>
+        <strong>{{ message.username }}</strong>: {{ message.message }}
+        <small>[{{ message.timestamp|date:"Y-m-d H:i:s" }}]</small>
+      </div>
+      {% endfor %}
+    </div>
+    <div style="font-size: 20px">
       <input type="text" id="id_message_send_input" />
-      <button type="submit" id="id_message_send_button">Send Message</button>
-      <br />
-      <br />
+      <button type="button" id="id_message_send_button">Send Message</button>
     </div>
     <script>
-      const username = "{% if request.user.is_authenticated %}{{ request.user.username }}{% else %}{{ request.session.anonymous_id|default:'Guest' }}{% endif %}";
-      const chatSocket = new WebSocket("ws://" + window.location.host + "/");
+      const username = {% if request.user.is_authenticated %}"{{ request.user.username }}"{% else %}"{{ request.session.anonymous_id|default:'Guest' }}"{% endif %};
+      const chatSocket = new WebSocket(
+        (window.location.protocol === "https:" ? "wss://" : "ws://") + window.location.host + "/"
+      );
       chatSocket.onopen = function (e) {
         console.log("The connection was setup successfully !");
       };
@@ -33,22 +47,25 @@
       };
       document.querySelector("#id_message_send_input").focus();
       document.querySelector("#id_message_send_input").onkeyup = function (e) {
-        if (e.keyCode == 13) {
+        if (e.keyCode === 13) {
           document.querySelector("#id_message_send_button").click();
         }
       };
       document.querySelector("#id_message_send_button").onclick = function (e) {
         const messageInput = document.querySelector("#id_message_send_input");
-        const message = messageInput.value;
-        chatSocket.send(JSON.stringify({ message: message, username: username }));
-        messageInput.value = '';
+        const message = messageInput.value.trim();
+        if(message) {
+          chatSocket.send(JSON.stringify({ message: message, username: username }));
+          messageInput.value = "";
+        }
       };
       chatSocket.onmessage = function (e) {
         const data = JSON.parse(e.data);
         var div = document.createElement("div");
         div.innerHTML = `<strong>${data.username}</strong>: ${data.message} <small>[${data.timestamp}]</small>`;
-        document.querySelector("#id_chat_item_container").appendChild(div);
-        document.querySelector("#id_message_send_input").value = "";
+        document.querySelector("#id_chat_log_container").appendChild(div);
+        // 스크롤바를 최하단으로 이동시킴
+        document.querySelector("#id_chat_log_container").scrollTop = document.querySelector("#id_chat_log_container").scrollHeight;
       };
     </script>
   </body>
