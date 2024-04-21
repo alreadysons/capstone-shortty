@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages  
-from .models import Message
+from .models import Message,Category
 
 # Create your views here.
 def main_view(request):
@@ -58,9 +58,11 @@ def anonymous_login_view(request):
 
 def chatPage(request, *args, **kwargs):
     # 로그인 상태와 상관없이 채팅 페이지 접근 허용
-    messages = Message.objects.all().order_by('timestamp')[:50]
+    messages = Message.objects.all().order_by('timestamp')[50:]
+    categories = Category.objects.all().order_by('name')
     context = {
-        'username': request.session.get('anonymous_id', 'Guest') if not request.user.is_authenticated else request.user.username ,
-        'messages' : messages
+        'username': request.session.get('anonymous_id', 'Guest') if not request.user.is_authenticated else request.user.username,
+        'messages': messages,
+        'categories': categories  # 카테고리 목록 추가
     }
     return render(request, "main/chat.html", context)

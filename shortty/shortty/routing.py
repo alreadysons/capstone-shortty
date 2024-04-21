@@ -1,8 +1,18 @@
-from django.urls import path , include
-from .consumer import ChatConsumer
+# your_project/routing.py
+from channels.routing import ProtocolTypeRouter, URLRouter
+from django.urls import path
+from channels.auth import AuthMiddlewareStack
+from .consumer import  ChatConsumer
 
-# Here, "" is routing to the URL ChatConsumer which 
-# will handle the chat functionality.
 websocket_urlpatterns = [
-    path("" , ChatConsumer.as_asgi()) , 
-] 
+    path('ws/chat/', ChatConsumer.as_asgi()),
+]
+
+application = ProtocolTypeRouter({
+    # (http->django views is added by default)
+    'websocket': AuthMiddlewareStack(
+        URLRouter(
+            websocket_urlpatterns
+        )
+    ),
+})
