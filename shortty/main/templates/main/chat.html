@@ -1,43 +1,15 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <style>
-      .container {
-        display: flex;
-      }
-      #id_category_container {
-        width: 200px;
-        height: 400px;
-        overflow-y: auto;
-        border: 1px solid #ccc;
-        padding: 10px;
-        background-color: #e9e9e9;
-        margin-right: 20px;
-      }
-      #id_chat_log_container {
-        flex-grow: 1;
-        height: 400px;
-        overflow-y: auto;
-        border: 1px solid #ccc;
-        padding: 10px;
-        background-color: #f9f9f9;
-      }
-      .message-input-container {
-        font-size: 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center; /* 센터 정렬을 위한 추가 스타일 */
-      }
-      .message-input-container input {
-        flex-grow: 1;
-        margin-right: 10px;
-      }
-    </style>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
   </head>
   <body>
     <center>
       <h1>
-        Hello, Welcome to my chat site! {% if request.user.is_authenticated %}
+        안녕하세요, 채팅 사이트에 오신 것을 환영합니다! 
+        <br>
+        {% if request.user.is_authenticated %}
         {{ request.user.username }}{% else %}
         {{ request.session.anonymous_id|default:"Guest" }}{% endif %}
       </h1>
@@ -52,7 +24,6 @@
         </button>
         {% endfor %}
       </div>
-
       <div>
         <div id="id_chat_log_container">
           <!-- 로드된 메시지 표시 -->
@@ -65,43 +36,38 @@
           {% endfor %}
         </div>
         <div class="message-input-container">
-          <!--카테고리 선택 드롭 다운 -->
+          <!-- 카테고리 선택 드롭 다운 -->
           <select id="id_category_select">
-              <option value="">Select a category</option>
-              {% for category in categories %}
-              <option value="{{ category.id }}">{{ category.name }}</option>
-              {% endfor %}
+            <option value="">카테고리 선택</option>
+            {% for category in categories %}
+            <option value="{{ category.id }}">{{ category.name }}</option>
+            {% endfor %}
           </select>
           <!-- 메세지 입력 필드-->
-          <input type="text" id="id_message_input" placeholder="Type a message..." />
+          <input type="text" id="id_message_input" placeholder="메시지를 입력하세요..." />
           <!-- 메세지 전송 버튼 -->
-          <button type="button" id="id_send_button">Send</button>
+          <button type="button" id="id_send_button">전송</button>
+        </div>
       </div>
     </div>
 
     <script>
+      // WebSocket 연결
       const chatSocket = new WebSocket(
         (window.location.protocol === "https:" ? "wss://" : "ws://") +
-          window.location.host +
-          "/ws/chat/"
+        window.location.host +
+        "/ws/chat/"
       );
-      let selectedCategoryId = null;
 
-      function selectCategory(categoryId) {
-        selectedCategoryId = categoryId;
-      }
-
+      // 카테고리 버튼 클릭 이벤트 핸들러
       document.querySelectorAll(".category-button").forEach((button) => {
         button.addEventListener("click", function () {
-          selectedCategoryId = this.getAttribute("data-category-id");
-          // 선택된 카테고리를 시각적으로 표시할 수 있습니다.
-          document.querySelectorAll(".category-button").forEach((btn) => {
-            btn.classList.remove("selected");
-          });
-          this.classList.add("selected"); // 선택된 스타일을 적용하기 위한 클래스 추가
+          const categoryId = this.getAttribute("data-category-id");
+          window.location.href = `/chat/${categoryId}/`; // 카테고리 ID를 URL에 사용
         });
       });
 
+      // 메세지 전송 버튼 클릭 이벤트 핸들러
       document.querySelector("#id_send_button").onclick = function () {
         const messageInput = document.querySelector("#id_message_input");
         const categorySelect = document.querySelector("#id_category_select");
@@ -109,29 +75,22 @@
         const categoryId = categorySelect.value;
 
         if (message && categoryId) {
-            chatSocket.send(JSON.stringify({
-                message: message,
-                categoryId: categoryId, // 선택된 카테고리 ID
-            }));
-            messageInput.value = "";
-        } else {
-            // 메시지나 카테고리가 선택되지 않았다면 경고를 표시합니다.
-            alert("Please select a category and type a message.");
-        }
-    };
-
-      chatSocket.onmessage = function (e) {
-        const data = JSON.parse(e.data);
-        var messageDiv = document.createElement("div");
-        messageDiv.innerHTML = `<strong>${data.username}</strong>: <em>[${
-          data.category || "No Category"
-        }]</em> ${data.message} <small>[${data.timestamp}]</small>`;
-        document
-          .querySelector("#id_chat_log_container")
-          .appendChild(messageDiv);
-        document.querySelector("#id_chat_log_container").scrollTop =
-          document.querySelector("#id_chat_log_container").scrollHeight;
-      };
-    </script>
-  </body>
+          chatSocket.send(JSON.stringify({
+            message: message,
+            categoryId: categoryId, // 선택된 카테고리 ID
+          }));
+          messageInput.value = "";
+        } else {alert("카테고리를 선택하고 메시지를 입력하세요.");
+    }
+};
+  // WebSocket 메시지 수신 이벤트 핸들러
+  chatSocket.onmessage = function (e) {
+    const data = JSON.parse(e.data);
+    var messageDiv = document.createElement("div");
+    messageDiv.innerHTML = `<strong>${data.username}</strong>: <em>[${data.category || "No Category"}]</em> ${data.message} <small>[${data.timestamp}]</small>`;
+    document.querySelector("#id_chat_log_container").appendChild(messageDiv);
+    document.querySelector("#id_chat_log_container").scrollTop = document.querySelector("#id_chat_log_container").scrollHeight;
+  };
+</script>
+</body>
 </html>

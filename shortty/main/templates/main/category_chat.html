@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+  </head>
+  <body>
+    <!-- Chat으로 돌아가기 링크 -->
+    <a href="{% url 'main:chat' %}" style="margin-left: 20px">Back to Chat</a>
+
+    <center>
+      <h1>
+        안녕하세요, {{category.name}}에 오신 것을 환영합니다! 
+        <br>
+        {% if request.user.is_authenticated %}
+        {{ request.user.username }}{% else %}
+        {{ request.session.anonymous_id|default:"Guest" }}{% endif %}
+      </h1>
+    </center>
+    <br />
+    <div class="container">
+      <div id="id_category_container">
+        <!-- 카테고리 목록 표시 -->
+        {% for category in categories %}
+        <button
+          class="category-button"
+          data-category-id="{{ category.id }}"
+        >
+          {{ category.name }}
+        </button>
+        {% endfor %}
+      </div>
+      <div>
+        <div id="id_chat_log_container">
+          <!-- 로드된 메시지 표시 -->
+          {% for message in messages %}
+          <div>
+            <strong>{{ message.username }}</strong>:
+            <em>[{{ message.category.name }}]</em> {{ message.message }}
+            <small>[{{ message.timestamp|date:"Y-m-d H:i:s" }}]</small>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="message-input-container">
+          <!-- 메세지 입력 필드-->
+          <input
+            type="text"
+            id="id_message_input"
+            placeholder="Type a message..."
+          />
+          <!-- 메세지 전송 버튼 -->
+          <button type="button" id="id_send_button">Send</button>
+        </div>
+      </div>
+
+      <script>
+        const chatSocket = new WebSocket(
+          (window.location.protocol === "https:" ? "wss://" : "ws://") +
+            window.location.host +
+            "/ws/chat/"
+        );
+
+        // 카테고리 버튼 클릭 이벤트 핸들러
+        document.querySelectorAll(".category-button").forEach((button) => {
+          button.addEventListener("click", function () {
+            const categoryId = this.getAttribute("data-category-id");
+            window.location.href = `/chat/${categoryId}/`; // 카테고리 ID를 URL에 사용
+          });
+        });
+
+        document.querySelector("#id_send_button").onclick = function () {
+          const messageInput = document.querySelector("#id_message_input");
+          const message = messageInput.value.trim();
+          const categoryId = "{{ category.id }}"; // 현재 페이지의 카테고리 ID
+
+          if (message) {
+            chatSocket.send(
+              JSON.stringify({
+                message: message,
+                categoryId: categoryId,
+              })
+            );
+            messageInput.value = "";
+          } else {
+            alert("Please type a message.");
+          }
+        };
+
+        chatSocket.onmessage = function (e) {
+          const data = JSON.parse(e.data);
+          var messageDiv = document.createElement("div");
+          messageDiv.innerHTML = `<strong>${data.username}</strong>: <em>[${
+            data.category || "No Category"
+          }]</em> ${data.message} <small>[${data.timestamp}]</small>`;
+          document
+            .querySelector("#id_chat_log_container")
+            .appendChild(messageDiv);
+          document.querySelector("#id_chat_log_container").scrollTop =
+            document.querySelector("#id_chat_log_container").scrollHeight;
+        };
+      </script>
+    </div>
+  </body>
+</html>

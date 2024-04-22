@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import main_view, login_view , signup_view,anonymous_login_view , chatPage
+from .views import main_view, login_view , signup_view,anonymous_login_view , chatPage , category_chat_view
 
 app_name = "main"
 urlpatterns = [
@@ -8,4 +8,5 @@ urlpatterns = [
     path('signup/', signup_view, name='signup'), #회원가입 뷰
     path('anonymous/', anonymous_login_view, name='anonymous_login'), # 익명 접속 뷰
     path("chat/",chatPage, name="chat"),
+    path('chat/<int:category_id>/', category_chat_view, name='category_chat'),
 ]
