@@ -1,36 +1,97 @@
-/* styles.css */
 .container {
-    display: flex;
-  }
-  
-  #id_category_container {
-    width: 200px;
-    height: 400px;
-    overflow-y: auto;
-    border: 1px solid #ccc;
-    padding: 10px;
-    background-color: #e9e9e9;
-    margin-right: 20px;
-  }
-  
-  #id_chat_log_container {
-    flex-grow: 1;
-    height: 400px;
-    overflow-y: auto;
-    border: 1px solid #ccc;
-    padding: 10px;
-    background-color: #f9f9f9;
-  }
-  
-  .message-input-container {
-    font-size: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .message-input-container input {
-    flex-grow: 1;
-    margin-right: 10px;
-  }
-  
+  display: flex;
+  align-items: start; /* Ensures that items start at the same point vertically */
+  gap: 20px; /* Ensures spacing between elements is consistent */
+  padding-bottom: 10px; /* Adds padding at the bottom for overall spacing */
+}
+
+#id_category_container {
+  width: 20%; /* Adjusts the width to be a percentage for responsive design */
+  max-width: 200px; /* Ensures it does not grow beyond 200px */
+  height: calc(100vh - 100px); /* Adjusts the height relative to the viewport */
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  padding: 10px;
+  background-color: #e9e9e9;
+}
+
+#id_chat_log_container {
+  flex-grow: 1;
+  width: 75%; /* Controls width dynamically with flex-grow */
+  height: calc(100vh - 100px); /* Adjusts the height relative to the viewport */
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  padding: 10px;
+  background-color: #f9f9f9;
+}
+
+.message-input-container {
+  position: fixed;
+  bottom: 10px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 0;
+  background-color: #f8f9fa; /* Matches the body's background for consistency */
+}
+
+.message-input-container input {
+  flex-grow: 1;
+  padding: 10px 20px;
+  margin-right: 10px; /* Ensures space between the input and the send button */
+  border: 2px solid #ccc;
+  border-radius: 5px;
+}
+
+.message-input-container button {
+  padding: 10px 20px;
+  background-color: #17a2b8;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.message-input-container button:hover {
+  background-color: #138496;
+}
+
+.form-select {
+  padding: 10px;
+  border: 2px solid #ccc;
+  border-radius: 5px;
+}
+/* Message styling */
+.message {
+  background-color: #f0f0f0; /* Light grey background for messages */
+  border-radius: 10px; /* Rounded corners for message bubbles */
+  padding: 10px 15px; /* Padding inside message bubbles */
+  margin: 5px 0; /* Space between messages */
+  max-width: 80%; /* Maximum width of a message */
+  word-wrap: break-word; /* Ensures text breaks to avoid overflow */
+}
+
+.message.own {
+  background-color: #17a2b8; /* Different background for own messages */
+  color: white; /* White text for better readability */
+  margin-left: auto; /* Aligns the message to the right */
+}
+
+.message .username {
+  font-weight: bold; /* Makes the username bold */
+}
+
+.message .timestamp {
+  font-size: 0.75rem; /* Smaller font size for timestamps */
+  float: right; /* Aligns timestamp to the right */
+  color: #666; /* Grey color for timestamps */
+}
+
+/* Adjusting overall chat log container */
+#id_chat_log_container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Aligns messages to the left */
+}

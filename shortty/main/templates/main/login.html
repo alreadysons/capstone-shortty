@@ -1,27 +1,85 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="auto">
   <head>
+    {% load static %}
+    {% load widget_tweaks %}
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="{% static 'css/log_in.css' %}" />
+    <style>
+      :root {
+        --bs-primary: #17a2b8; /* Bootstrap primary now uses a teal color */
+        --bs-info: #48cae4; /* Lighter shade of teal for secondary buttons */
+      }
+      .btn-primary {
+        background-color: var(--bs-primary);
+        border-color: var(--bs-primary);
+      }
+      .btn-info {
+        background-color: var(--bs-info);
+        border-color: var(--bs-info);
+      }
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f4f4f4; /* Soft background color */
+      }
+      .form-signin {
+        width: 90%;
+        max-width: 500px;
+        padding: 20px;
+        background: white;
+        border-radius: 5px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      }
+      h1 {
+        text-align: center;
+        color: #333;
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   </head>
-  <body>
-    <h1>Login Page</h1>
-    <!-- 로그인 폼 -->
-    <form method="post" action="{% url 'main:login' %}">
-      {% csrf_token %} {{ form.as_p }}
-      <button type="submit">Login</button>
-    </form>
-
-    <!-- 회원 가입 버튼 -->
-    <form method="post" action="{% url 'main:signup' %}">
-      {% csrf_token %}
-      <button type="submit">signup</button>
-    </form>
-    <!-- 익명으로 접속 버튼 -->
-    <form method="post" action="{% url 'main:anonymous_login' %}">
-      {% csrf_token %}
-      <button type="submit">Browse Anonymously</button>
-    </form>
+  <body class="d-flex align-items-center py-4 bg-body-tertiary">
+    <main class="form-signin w-100 m-auto">
+      <!-- Logo Image -->
+      <img src="{% static 'image/shortty.png' %}" alt="Logo" style="width:50%; height: 50%;" class="mb-4 mx-auto d-block">
+      <!-- 로그인 폼 -->
+      <form method="post" action="{% url 'main:login' %}" class="mb-3">
+        {% csrf_token %}
+        {% for field in form %}
+          <div class="mb-3">
+            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+            {{ field|add_class:'form-control' }} <!-- Applying Bootstrap form-control class -->
+            {% if field.help_text %}
+              <div class="form-text">{{ field.help_text }}</div>
+            {% endif %}
+            {% for error in field.errors %}
+              <div class="alert alert-danger" role="alert">
+                {{ error }}
+              </div>
+            {% endfor %}
+          </div>
+        {% endfor %}
+        <button class="btn btn-primary w-100 py-2" type="submit">로그인</button>
+      </form>
+      <!-- 회원 가입 버튼 -->
+      <form method="post" action="{% url 'main:signup' %}" class="mb-3">
+        {% csrf_token %}
+        <button class="btn btn-secondary w-100 py-2" type="submit">
+          회원가입
+        </button>
+      </form>
+      <!-- 익명 로그인 버튼 -->
+      <form method="post" action="{% url 'main:anonymous_login' %}" class="mb-3">
+        {% csrf_token %}
+        <button class="btn btn-info w-100 py-2" type="submit">
+          익명 로그인
+        </button>
+      </form>
+    </main>
   </body>
 </html>

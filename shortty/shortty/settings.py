@@ -34,6 +34,7 @@ ALLOWED_HOSTS = ['*']
 INSTALLED_APPS = [
     "daphne",
     "channels",
+    'widget_tweaks',
     "main.apps.MainConfig",
     "django.contrib.admin",
     "django.contrib.auth",
