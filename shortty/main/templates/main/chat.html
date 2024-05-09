@@ -19,11 +19,13 @@
     }
     #id_category_container {
       flex: 1;
+      margin-top: 15px;
       background: #ffffff;
       padding: 20px;
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       overflow-y: auto; /* enables scrolling */
+      height: 30em;
     }
     #id_chat_log_container {
       flex: 3;
@@ -33,6 +35,7 @@
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       overflow-y: auto; /* enables scrolling */
+      height: 30em;
     }
     .message-input-container {
       position: fixed;
@@ -62,6 +65,7 @@
     }
     .btn-primary {
       padding: 10px 20px; /* Increase padding for better touch target size */
+      background-color: #138496;
     }
     .form-select {
       width: auto; /* Adjust based on content width rather than stretching */
@@ -69,16 +73,28 @@
   </style>
 </head>
 <body>
-  <div class="container text-center mt-4">
-    <h1>Welcome to the Chat Site!</h1>
-    <p>
-      {% if request.user.is_authenticated %}
-        {{ request.user.username }}
-      {% else %}
-        {{ request.session.anonymous_id|default:"Guest" }}
-      {% endif %}
-    </p>
-  </div>
+  <nav class="navbar bg-light">
+    <div class="container-fluid">
+      <!-- 로고 및 홈 링크 -->
+      <a class="navbar-brand" href="{% url 'main:chat' %}">
+        <img src="{% static 'image/shortty_logo.png' %}" alt="Logo" width="30" height="24" class="d-inline-block align-text-top">
+        Shortty
+      </a>
+      <!-- 사용자 이름 출력 -->
+      <div class="navbar-text ms-auto me-4">
+        {% if request.user.is_authenticated %}
+          {{ request.user.username }}
+        {% else %}
+          {{ request.session.anonymous_id|default:"Guest" }}
+        {% endif %}
+      </div>
+      <!-- 검색 폼 -->
+      <form class="d-flex" role="search">
+        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+        <button class="btn btn-outline-primary" type="submit">Search</button>
+      </form>
+    </div>
+  </nav>
   <div class="container">
     <div id="id_category_container">
       {% for category in categories %}
@@ -91,8 +107,8 @@
       {% for message in messages %}
       <div class="message{% if message.username == request.user.username %} own{% endif %}">
         <span class="username">{{ message.username }}</span>:
-        <span class="content">{{ message.message }}</span>
-        <span class="timestamp">[{{ message.timestamp|date:"Y-m-d H:i:s" }}]</span>
+        <span class="content">[{{ message.category.name }}]{{ message.message }}</span>
+        <span class="timestamp">[{{ message.timestamp|date:"H:i" }}]</span>
       </div>
     {% endfor %}    
     </div>
@@ -143,11 +159,25 @@
 // WebSocket 메시지 수신 이벤트 핸들러
 chatSocket.onmessage = function (e) {
   const data = JSON.parse(e.data);
+  
+  // 날짜 객체 생성
+  const date = new Date(data.timestamp);
+  
+  // 시간과 분만 포맷팅
+  const timeFormatted = date.getHours() + ':' + (date.getMinutes()<10?'0':'') + date.getMinutes();
+
   var messageDiv = document.createElement("div");
-  messageDiv.innerHTML = `<strong>${data.username}</strong>: <em>[${data.category || "No Category"}]</em> ${data.message} <small>[${data.timestamp}]</small>`;
+  messageDiv.className = `message ${(data.username === "{{ request.user.username }}") ? 'own' : ''}`;
+  
+  // 메시지 내용에 시간과 분만 포함하여 출력
+  messageDiv.innerHTML = `<strong>${data.username}</strong>:[${data.category || "No Category"}] ${data.message} <small class="timestamp">[${timeFormatted}]</small>`;
+  
   document.querySelector("#id_chat_log_container").appendChild(messageDiv);
   document.querySelector("#id_chat_log_container").scrollTop = document.querySelector("#id_chat_log_container").scrollHeight;
 };
+
+
+
 </script>
 
 </body>
