@@ -51,14 +51,12 @@ def anonymous_login_view(request):
 
 # 채팅 페이지 뷰
 def chatPage(request, *args, **kwargs):
-    messages = Message.objects.all().order_by('timestamp')[50:]  # 최근 50개 메시지만 표시
-    categories = Category.objects.all().order_by('name')
-    message_num = Category.objects.annotate(msg_count=Count('messages'))
+    messages = Message.objects.all().order_by('timestamp')[:50]  # 최근 50개 메시지만 표시
+    categories = Category.objects.annotate(msg_count=Count('messages')).order_by('-msg_count')
     context = {
         'username': request.session.get('anonymous_id', 'Guest') if not request.user.is_authenticated else request.user.username,
         'messages': messages,
         'categories': categories,
-        'message_num' : message_num
     }
     return render(request, "main/chat.html", context)
 
@@ -67,8 +65,3 @@ def category_chat_view(request, category_id):
     category = get_object_or_404(Category, id=category_id)
     messages = Message.objects.filter(category=category).order_by('timestamp')
     return render(request, 'main/category_chat.html', {'category': category, 'messages': messages})
-
-#카테고리별 메세지 개수
-def category_list(request):
-    message_num = Category.objects.annotate(msg_count=Count('message'))
-    return render(request, 'main/chat.html', {'message_num': message_num})

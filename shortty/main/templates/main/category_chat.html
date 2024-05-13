@@ -103,17 +103,6 @@
         </form>
       </div>
     </nav>
-    <!---
-    <center>
-      <h1>
-        안녕하세요, {{category.name}}에 오신 것을 환영합니다! 
-        <br>
-        {% if request.user.is_authenticated %}
-        {{ request.user.username }}{% else %}
-        {{ request.session.anonymous_id|default:"Guest" }}{% endif %}
-      </h1>
-    </center>
-    --->
     <br />
     <div class="container">
       <div>
@@ -123,7 +112,7 @@
           <div class="message{% if message.username == request.user.username %} own{% endif %}">
             <span class="username">{{ message.username }}</span>:
             <span class="content">[{{ message.category.name }}]{{ message.message }}</span>
-            <span class="timestamp">[{{ message.timestamp|date:"Y-m-d H:i:s" }}]</span>
+            <span class="timestamp">[{{ message.timestamp|date:"H:i" }}]</span>
           </div>
           {% endfor %}
         </div>
