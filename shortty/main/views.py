@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login , logout
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib import messages
 from .models import Message, Category
@@ -48,6 +48,11 @@ def anonymous_login_view(request):
     hashed_id = hashlib.sha256(raw_id.encode()).hexdigest()[:8]
     request.session['anonymous_id'] = f'익명{hashed_id}'
     return redirect('main:chat')
+
+#로그아웃 뷰
+def logout_view(request):
+    logout(request)
+    return redirect('main:login')
 
 # 채팅 페이지 뷰
 def chatPage(request, *args, **kwargs):

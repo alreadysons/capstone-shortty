@@ -87,6 +87,8 @@
         {% else %}
           {{ request.session.anonymous_id|default:"Guest" }}
         {% endif %}
+        <!--로그아웃 버튼-->
+        <a class="btn btn-outline-secondary ms-2" href="{% url 'main:logout' %}">Logout</a>
       </div>
       <!-- 검색 폼 -->
       <form class="d-flex" role="search">
