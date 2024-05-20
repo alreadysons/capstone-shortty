@@ -110,14 +110,15 @@
     </ul>
     </div>
     <div id="id_chat_log_container" class="mt-3">
-          <!-- 로드된 메시지 표시 -->
-          {% for message in messages %}
-          <div class="message{% if message.username == request.user.username %} own{% endif %}">
-            <span class="username">{{ message.username }}</span>:
-            <span class="content">[{{ message.category.name }}]{{ message.message }}</span>
-            <span class="timestamp">[{{ message.timestamp|date:"H:i" }}]</span>
-          </div>
-          {% endfor %}
+<!-- 로드된 메시지 표시 -->
+{% for message in messages %}
+  <div class="message{% if message.username == request.user.username or message.username == request.session.anonymous_id %} own{% endif %}">
+    <span class="username">{{ message.username }}</span>:
+    <span class="content">[{{ message.category.name }}]{{ message.message }}</span>
+    <span class="timestamp">[{{ message.timestamp|date:"H:i" }}]</span>
+  </div>
+{% endfor %}
+
     </div>
     <div class="message-input-container">
       <select id="id_category_select" class="form-select">
@@ -139,6 +140,12 @@
       "/ws/chat/"
     );
 
+    //스크롤 자동이동
+    window.onload = function() {
+      var messageContainer = document.getElementById('id_chat_log_container');
+      messageContainer.scrollTop = messageContainer.scrollHeight;
+    };
+
     // 카테고리 버튼 클릭 이벤트 핸들러
     document.querySelectorAll(".category-button").forEach((button) => {
       button.addEventListener("click", function () {
@@ -147,45 +154,62 @@
       });
     });
 
-    // 메세지 전송 버튼 클릭 이벤트 핸들러
-    document.querySelector("#id_send_button").onclick = function () {
-      const messageInput = document.querySelector("#id_message_input");
-      const categorySelect = document.querySelector("#id_category_select");
-      const message = messageInput.value.trim();
-      const categoryId = categorySelect.value;
+    // 메세지 전송 함수
+  // 메시지 전송 함수
+  function sendMessage() {
+    const messageInput = document.querySelector("#id_message_input");
+    const categorySelect = document.querySelector("#id_category_select");
+    const message = messageInput.value.trim();
+    const categoryId = categorySelect.value;
 
-      if (message && categoryId) {
-        chatSocket.send(JSON.stringify({
-          message: message,
-          categoryId: categoryId, // 선택된 카테고리 ID
-        }));
-        messageInput.value = "";
-      } else {alert("카테고리를 선택하고 메시지를 입력하세요.");
+    // 카테고리가 선택되었는지 확인
+    if (!categoryId) {
+      alert("카테고리를 선택하세요."); // 카테고리 선택되지 않았을 경우 오류 메시지 표시
+      return; // 함수 종료
+    }
+
+    // 메시지 전송
+    chatSocket.send(JSON.stringify({
+      message: message,
+      categoryId: categoryId,
+    }));
+    messageInput.value = ""; // 입력 필드 초기화
   }
-};
-// WebSocket 메시지 수신 이벤트 핸들러
+
+
+    // 메세지 전송 버튼 클릭 이벤트 핸들러
+    document.querySelector("#id_send_button").onclick = sendMessage;
+
+    // 엔터키로 메세지 전송
+    document.querySelector("#id_message_input").addEventListener("keyup", function(event) {
+      if (event.key === "Enter") {
+        sendMessage();
+      }
+    });
+
+    const currentUsername = "{{ request.user.username }}";
+const anonymousId = "{{ request.session.anonymous_id|default:'Guest' }}";
+
+    // WebSocket 메시지 수신 이벤트 핸들러
 chatSocket.onmessage = function (e) {
   const data = JSON.parse(e.data);
-  
+
   // 날짜 객체 생성
   const date = new Date(data.timestamp);
-  
+
   // 시간과 분만 포맷팅
-  const timeFormatted = date.getHours() + ':' + (date.getMinutes()<10?'0':'') + date.getMinutes();
+  const timeFormatted = date.getHours() + ':' + (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
 
   var messageDiv = document.createElement("div");
-  messageDiv.className = `message ${(data.username === "{{ request.user.username }}") ? 'own' : ''}`;
-  
+  messageDiv.className = `message ${data.username === currentUsername || data.username === anonymousId ? 'own' : ''}`;
+
   // 메시지 내용에 시간과 분만 포함하여 출력
   messageDiv.innerHTML = `<strong>${data.username}</strong>:[${data.category || "No Category"}] ${data.message} <small class="timestamp">[${timeFormatted}]</small>`;
-  
+
   document.querySelector("#id_chat_log_container").appendChild(messageDiv);
   document.querySelector("#id_chat_log_container").scrollTop = document.querySelector("#id_chat_log_container").scrollHeight;
 };
 
-
-
-</script>
-
+  </script>
 </body>
 </html>

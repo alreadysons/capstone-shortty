@@ -138,7 +138,8 @@
           });
         });
 
-        document.querySelector("#id_send_button").onclick = function () {
+        // 메시지 전송 함수
+        function sendMessage() {
           const messageInput = document.querySelector("#id_message_input");
           const message = messageInput.value.trim();
           const categoryId = "{{ category.id }}"; // 현재 페이지의 카테고리 ID
@@ -151,30 +152,38 @@
               })
             );
             messageInput.value = "";
-          } else {
-            alert("Please type a message.");
+          } 
+        }
+
+        // 메세지 전송 버튼 클릭 이벤트 핸들러
+        document.querySelector("#id_send_button").onclick = sendMessage;
+
+        // 엔터키로 메세지 전송
+        document.querySelector("#id_message_input").addEventListener("keyup", function(event) {
+          if (event.key === "Enter") {
+            sendMessage();
           }
+        });
+
+        // WebSocket 메시지 수신 이벤트 핸들러
+        chatSocket.onmessage = function (e) {
+          const data = JSON.parse(e.data);
+          
+          // 날짜 객체 생성
+          const date = new Date(data.timestamp);
+          
+          // 시간과 분만 포맷팅
+          const timeFormatted = date.getHours() + ':' + (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
+
+          var messageDiv = document.createElement("div");
+          messageDiv.className = `message ${(data.username === "{{ request.user.username }}") ? 'own' : ''}`;
+          
+          // 메시지 내용에 시간과 분만 포함하여 출력
+          messageDiv.innerHTML = `<strong>${data.username}</strong>:[${data.category || "No Category"}] ${data.message} <small class="timestamp">[${timeFormatted}]</small>`;
+          
+          document.querySelector("#id_chat_log_container").appendChild(messageDiv);
+          document.querySelector("#id_chat_log_container").scrollTop = document.querySelector("#id_chat_log_container").scrollHeight;
         };
-
-// WebSocket 메시지 수신 이벤트 핸들러
-chatSocket.onmessage = function (e) {
-  const data = JSON.parse(e.data);
-  
-  // 날짜 객체 생성
-  const date = new Date(data.timestamp);
-  
-  // 시간과 분만 포맷팅
-  const timeFormatted = date.getHours() + ':' + (date.getMinutes()<10?'0':'') + date.getMinutes();
-
-  var messageDiv = document.createElement("div");
-  messageDiv.className = `message ${(data.username === "{{ request.user.username }}") ? 'own' : ''}`;
-  
-  // 메시지 내용에 시간과 분만 포함하여 출력
-  messageDiv.innerHTML = `<strong>${data.username}</strong>:[${data.category || "No Category"}] ${data.message} <small class="timestamp">[${timeFormatted}]</small>`;
-  
-  document.querySelector("#id_chat_log_container").appendChild(messageDiv);
-  document.querySelector("#id_chat_log_container").scrollTop = document.querySelector("#id_chat_log_container").scrollHeight;
-};
       </script>
     </div>
   </body>
