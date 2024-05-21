@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import main_view, login_view , signup_view,anonymous_login_view , chatPage , category_chat_view,logout_view
+from .views import main_view, login_view , signup_view,anonymous_login_view , chatPage , category_chat_view,logout_view,create_category_view
 
 app_name = "main"
 urlpatterns = [
@@ -10,4 +10,5 @@ urlpatterns = [
     path('anonymous/', anonymous_login_view, name='anonymous_login'), # 익명 접속 뷰
     path("chat/",chatPage, name="chat"),
     path('chat/<int:category_id>/', category_chat_view, name='category_chat'),
+    path('create/',create_category_view,name='create_category')
 ]

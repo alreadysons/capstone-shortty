@@ -72,3 +72,12 @@ def category_chat_view(request, category_id):
     messages = Message.objects.filter(category=category).order_by('-timestamp')[:50]
     messages = messages[::-1]
     return render(request, 'main/category_chat.html', {'category': category, 'messages': messages})
+
+# 카테고리 생성 뷰
+def create_category_view(request):
+    if request.method == 'POST':
+        category_name = request.POST.get('name')  # 수정: 입력 필드의 이름 변경 반영
+        if category_name:
+            Category.objects.create(name=category_name)
+            return redirect('main:chat')
+    return render(request, 'main/create_category.html')
