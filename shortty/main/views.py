@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login , logout
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib import messages
+from django.http import HttpResponse
 from .models import Message, Category
 import hashlib
 import datetime
@@ -81,3 +82,24 @@ def create_category_view(request):
             Category.objects.create(name=category_name)
             return redirect('main:chat')
     return render(request, 'main/create_category.html')
+
+from django.http import JsonResponse
+
+# 카테고리 검색뷰
+def search_view(request):
+    query = request.GET.get('q')
+    if query:
+        # 카테고리 이름에 검색어를 포함하는 카테고리를 찾습니다.
+        categories = Category.objects.filter(name__icontains=query)
+        
+        if categories.exists():
+            # 검색된 카테고리가 있을 경우, 첫 번째 검색 결과의 ID를 반환합니다.
+            return JsonResponse({'category_id': categories.first().id})
+        else:
+            # 검색된 카테고리가 없는 경우 에러를 반환합니다.
+            return JsonResponse({'error': 'no_results'})
+    else:
+        # 검색어가 없는 경우 에러를 반환합니다.
+        return JsonResponse({'error': 'no_query'})
+
+

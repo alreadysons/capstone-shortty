@@ -15,7 +15,7 @@
     .container {
       display: flex;
       margin-top: 20px;
-      height: 100vh; /* adjust height to fill screen */
+      height: 80vh; /* adjust height to fill screen */
     }
     #id_category_container {
       flex: 1;
@@ -137,6 +137,35 @@
       <button type="button" id="id_send_button" class="btn btn-primary">Send</button>
     </div>
   </div>
+  <script>
+    // 검색 폼 제출 이벤트 핸들러
+    document.querySelector("form").addEventListener("submit", function(event) {
+      event.preventDefault(); // 기본 제출 동작 방지
+  
+      const searchInput = document.querySelector(".form-control");
+      const searchQuery = searchInput.value.trim(); // 입력된 검색어
+  
+      // 카테고리 검색
+      const categoryButtons = document.querySelectorAll(".category-button");
+      let categoryFound = false; // 검색어와 일치하는 카테고리를 찾았는지 여부
+  
+      categoryButtons.forEach((button) => {
+        const categoryName = button.textContent.trim(); // 카테고리 이름
+  
+        // 검색어와 카테고리 이름이 일치하는지 확인
+        if (searchQuery === categoryName) {
+          const categoryId = button.getAttribute("data-category-id");
+          categoryFound = true;
+          window.location.href = `/chat/${categoryId}/`; // 해당 카테고리 페이지로 이동
+        }
+      });
+  
+      // 카테고리를 찾지 못한 경우 경고창 표시
+      if (!categoryFound) {
+        alert("검색된 카테고리가 없습니다.");
+      }
+    });
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     // WebSocket 연결

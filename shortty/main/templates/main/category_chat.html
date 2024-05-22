@@ -1,194 +1,250 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     {% load static %}
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <title>Chat Site</title>
     <style>
-      body {
-        background-color: #f8f9fa;
-        font-family: 'Arial', sans-serif;
-      }
-      .container {
-        display: flex;
-        margin-top: 20px;
-        height: 10vh; /* adjust height to fill screen */
-      }
-      #id_category_container {
-        flex: 1;
-        background: #ffffff;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        overflow-y: auto; /* enables scrolling */
-      }
-      #id_chat_log_container {
-      width: 77em;
-      margin-left: 20px;
-      margin-right: 20px;
-      background: #ffffff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      overflow-y: auto; /* enables scrolling */
-      height: 29em;
-    }
-      .message-input-container {
-        position: fixed;
-        bottom: 10px;
-        left: 20px;
-        right: 20px;
-        display: flex;
-        gap: 10px;
-        align-items: center;
-      }
-      #id_message_input {
-        flex-grow: 1;
-        margin-right: 10px; /* Ensure some space between the input and the send button */
-      }
-      .category-button {
-        margin: 5px;
-        padding: 8px 16px;
-        font-size: 0.85rem;
-        border: none;
-        border-radius: 5px;
-        background-color: #17a2b8;
-        color: white;
-        cursor: pointer;
-      }
-      .category-button:hover {
-        background-color: #138496;
-      }
-      .btn-primary {
-        padding: 10px 20px; /* Increase padding for better touch target size */
-        background-color: #138496;
-      }
-      .form-select {
-        width: auto; /* Adjust based on content width rather than stretching */
-      }
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        .container {
+            display: flex;
+            margin-top: 20px;
+            height: 80vh; /* adjust height to fill screen */
+        }
+        #id_category_container {
+            flex: 1;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow-y: auto; /* enables scrolling */
+        }
+        #id_chat_log_container {
+            width: 77em;
+            margin-left: 20px;
+            margin-right: 20px;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow-y: auto; /* enables scrolling */
+            height: 60vh; /* adjusted height */
+        }
+        .message-input-container {
+            position: fixed;
+            bottom: 10px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        #id_message_input {
+            flex-grow: 1;
+            margin-right: 10px; /* Ensure some space between the input and the send button */
+        }
+        .category-button {
+            margin: 5px;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            border: none;
+            border-radius: 5px;
+            background-color: #17a2b8;
+            color: white;
+            cursor: pointer;
+        }
+        .category-button:hover {
+            background-color: #138496;
+        }
+        .btn-primary {
+            padding: 10px 20px; /* Increase padding for better touch target size */
+            background-color: #138496;
+        }
+        .form-select {
+            width: auto; /* Adjust based on content width rather than stretching */
+        }
+        .message {
+            margin-bottom: 10px;
+        }
+        .own {
+            background-color: #e9f7fe;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .timestamp {
+            font-size: 0.75rem;
+            color: #777;
+        }
     </style>
-  </head>
-  <body>
+</head>
+<body>
     <nav class="navbar bg-light">
-      <div class="container-fluid">
-        <!-- 로고 및 홈 링크 -->
-        <a class="navbar-brand" href="{% url 'main:chat' %}">
-          <img src="{% static 'image/shortty_logo.png' %}" alt="Logo" width="30" height="24" class="d-inline-block align-text-top">
-          Shortty
-        </a>
-        <!--카테고리명 출력-->
-        <div class="navbar-text ms-auto">
-          <strong>
-            {% if category %}
-              {{ category.name }}
-            {% else %}
-              No Category
-            {% endif %}
-          </strong>
+        <div class="container-fluid">
+            <!-- 로고 및 홈 링크 -->
+            <a class="navbar-brand" href="{% url 'main:chat' %}">
+                <img src="{% static 'image/shortty_logo.png' %}" alt="Logo" width="30" height="24" class="d-inline-block align-text-top">
+                Shortty
+            </a>
+            <!--카테고리명 출력-->
+            <div class="navbar-text ms-auto">
+                <strong>
+                    {% if category %}
+                        {{ category.name }}
+                    {% else %}
+                        No Category
+                    {% endif %}
+                </strong>
+            </div>
+            <!-- 사용자 이름 출력 -->
+            <div class="navbar-text ms-auto me-4">
+                {% if request.user.is_authenticated %}
+                    {{ request.user.username }}
+                {% else %}
+                    {{ request.session.anonymous_id|default:"Guest" }}
+                {% endif %}
+                <!--로그아웃 버튼-->
+                <a class="btn btn-outline-secondary ms-2" href="{% url 'main:logout' %}">Logout</a>
+            </div>
+<!-- 검색 폼 -->
+<form class="d-flex" action="{% url 'main:search' %}" method="GET">
+  <input class="form-control me-2" type="search" name="q" placeholder="Search" aria-label="Search">
+  <button class="btn btn-outline-primary" type="submit">Search</button>
+</form>
         </div>
-        <!-- 사용자 이름 출력 -->
-        <div class="navbar-text ms-auto me-4">
-          {% if request.user.is_authenticated %}
-            {{ request.user.username }}
-          {% else %}
-            {{ request.session.anonymous_id|default:"Guest" }}
-          {% endif %}
-        <!--로그아웃 버튼-->
-        <a class="btn btn-outline-secondary ms-2" href="{% url 'main:logout' %}">Logout</a>
-        </div>
-        <!-- 검색 폼 -->
-        <form class="d-flex" role="search">
-          <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-          <button class="btn btn-outline-primary" type="submit">Search</button>
-        </form>
-      </div>
     </nav>
+    <script>
+      // 검색 폼 제출 이벤트 핸들러
+      document.querySelector("form").addEventListener("submit", function(event) {
+          event.preventDefault(); // 기본 제출 동작 방지
+  
+          // 입력된 검색어 가져오기
+          const searchInput = document.querySelector(".form-control");
+          const searchQuery = searchInput.value.trim();
+  
+          // 검색어가 비어 있는 경우 아무 동작도 하지 않음
+          if (searchQuery === '') {
+              return;
+          }
+  
+          // 서버로 검색 쿼리 전송
+          fetch(`/search/?q=${searchQuery}`)
+              .then(response => {
+                  if (!response.ok) {
+                      throw new Error('Network response was not ok');
+                  }
+                  return response.json();
+              })
+              .then(data => {
+                  if (data.error === 'no_results') {
+                      // 검색 결과가 없는 경우 메시지 표시
+                      alert("검색된 카테고리가 없습니다.");
+                  } else {
+                      // 검색 결과가 있는 경우 해당 카테고리의 채팅 페이지로 이동
+                      window.location.href = `/chat/${data.category_id}/`;
+                  }
+              })
+              .catch(error => {
+                  console.error('Error:', error);
+                  alert("검색 중 오류가 발생했습니다.");
+              });
+      });
+  </script>  
+  
     <br />
     <div class="container">
-      <div>
-        <div id="id_chat_log_container" class = "mt-3">
-          <!-- 로드된 메시지 표시 -->
-          {% for message in messages %}
-          <div class="message{% if message.username == request.user.username or message.username == request.session.anonymous_id %} own{% endif %}">
-            <span class="username">{{ message.username }}</span>:
-  <span class="content">{{ message.message }}</span>
-  <span class="timestamp">[{{ message.timestamp|date:"H:i" }}]</span>
-</div>
-{% endfor %}
+        <div>
+            <div id="id_chat_log_container" class="mt-3">
+                <!-- 로드된 메시지 표시 -->
+                {% for message in messages %}
+                <div class="message{% if message.username == request.user.username or message.username == request.session.anonymous_id %} own{% endif %}">
+                    <span class="username">{{ message.username }}</span>:
+                    <span class="content">[{{ message.category.name }}]{{ message.message }}</span>
+                    <span class="timestamp">[{{ message.timestamp|date:"H:i" }}]</span>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="message-input-container">
+                <input type="text" id="id_message_input" class="form-control" placeholder="Enter your message..." />
+                <button type="button" id="id_send_button" class="btn btn-primary">Send</button>
+            </div>
         </div>
-        <div class="message-input-container">
-          <input type="text" id="id_message_input" class="form-control" placeholder="Enter your message..." />
-          <button type="button" id="id_send_button" class="btn btn-primary">Send</button>
-        </div>
-      </div>
-      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-      <script>
-        const chatSocket = new WebSocket(
-          (window.location.protocol === "https:" ? "wss://" : "ws://") +
-            window.location.host +
-            "/ws/chat/"
-        );
-
-        // 카테고리 버튼 클릭 이벤트 핸들러
-        document.querySelectorAll(".category-button").forEach((button) => {
-          button.addEventListener("click", function () {
-            const categoryId = this.getAttribute("data-category-id");
-            window.location.href = `/chat/${categoryId}/`; // 카테고리 ID를 URL에 사용
-          });
-        });
-
-        // 메시지 전송 함수
-        function sendMessage() {
-          const messageInput = document.querySelector("#id_message_input");
-          const message = messageInput.value.trim();
-          const categoryId = "{{ category.id }}"; // 현재 페이지의 카테고리 ID
-
-          if (message) {
-            chatSocket.send(
-              JSON.stringify({
-                message: message,
-                categoryId: categoryId,
-              })
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            const chatSocket = new WebSocket(
+                (window.location.protocol === "https:" ? "wss://" : "ws://") +
+                window.location.host +
+                "/ws/chat/"
             );
-            messageInput.value = "";
-          } 
-        }
 
-        // 메세지 전송 버튼 클릭 이벤트 핸들러
-        document.querySelector("#id_send_button").onclick = sendMessage;
+            // 현재 카테고리 ID 저장
+            const currentCategoryId = "{{ category.id }}";
+            const currentUsername = "{{ request.user.username }}";
+            const anonymousId = "{{ request.session.anonymous_id|default:'Guest' }}";
 
-        // 엔터키로 메세지 전송
-        document.querySelector("#id_message_input").addEventListener("keyup", function(event) {
-          if (event.key === "Enter") {
-            sendMessage();
-          }
-        });
-        const currentUsername = "{{ request.user.username }}";
-        const anonymousId = "{{ request.session.anonymous_id|default:'Guest' }}";
+            // 카테고리 버튼 클릭 이벤트 핸들러
+            document.querySelectorAll(".category-button").forEach((button) => {
+                button.addEventListener("click", function () {
+                    const categoryId = this.getAttribute("data-category-id");
+                    window.location.href = `/chat/${categoryId}/`; // 카테고리 ID를 URL에 사용
+                });
+            });
 
-        // WebSocket 메시지 수신 이벤트 핸들러
-        chatSocket.onmessage = function (e) {
-          const data = JSON.parse(e.data);
-          
-          // 날짜 객체 생성
-          const date = new Date(data.timestamp);
-          
-          // 시간과 분만 포맷팅
-          const timeFormatted = date.getHours() + ':' + (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
+            // 메시지 전송 함수
+            function sendMessage() {
+                const messageInput = document.querySelector("#id_message_input");
+                const message = messageInput.value.trim();
 
-          var messageDiv = document.createElement("div");
-          messageDiv.className = `message ${data.username === currentUsername || data.username === anonymousId ? 'own' : ''}`;
-          
-          // 메시지 내용에 시간과 분만 포함하여 출력
-          messageDiv.innerHTML = `<strong>${data.username}</strong>:[${data.category || "No Category"}] ${data.message} <small class="timestamp">[${timeFormatted}]</small>`;
-          
-          document.querySelector("#id_chat_log_container").appendChild(messageDiv);
-          document.querySelector("#id_chat_log_container").scrollTop = document.querySelector("#id_chat_log_container").scrollHeight;
-        };
-      </script>
+                if (message) {
+                    chatSocket.send(
+                        JSON.stringify({
+                            message: message,
+                            categoryId: currentCategoryId,
+                        })
+                    );
+                    messageInput.value = "";
+                }
+            }
+
+            // 메세지 전송 버튼 클릭 이벤트 핸들러
+            document.querySelector("#id_send_button").onclick = sendMessage;
+
+            // 엔터키로 메세지 전송
+            document.querySelector("#id_message_input").addEventListener("keyup", function(event) {
+                if (event.key === "Enter") {
+                    sendMessage();
+                }
+            });
+
+// WebSocket 메시지 수신 이벤트 핸들러
+chatSocket.onmessage = function (e) {
+    const data = JSON.parse(e.data);
+    const categoryName = "{{category.name}}";
+    // 수신된 메시지의 카테고리 ID 확인
+    if (!data.category || data.category !== categoryName) {
+        return; // 카테고리가 일치하지 않거나 데이터가 비어 있으면 무시
+    }
+
+    // 날짜 객체 생성
+    const date = new Date(data.timestamp);
+
+    // 시간과 분만 포맷팅
+    const timeFormatted = date.getHours() + ':' + (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
+
+    var messageDiv = document.createElement("div");
+    messageDiv.className = `message ${data.username === currentUsername || data.username === anonymousId ? 'own' : ''}`;
+
+    // 메시지 내용에 시간과 분만 포함하여 출력
+    messageDiv.innerHTML = `<strong>${data.username}</strong>:[${data.category || "No Category"}] ${data.message} <small class="timestamp">[${timeFormatted}]</small>`;
+
+    document.querySelector("#id_chat_log_container").appendChild(messageDiv);
+    document.querySelector("#id_chat_log_container").scrollTop = document.querySelector("#id_chat_log_container").scrollHeight;
+};
+        </script>
     </div>
-  </body>
+</body>
 </html>
