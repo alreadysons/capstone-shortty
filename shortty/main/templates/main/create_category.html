@@ -41,20 +41,20 @@
   </head>
   <body>
     <div class="form-create-category">
-      <h2>Create Category</h2>
+      <h2>카테고리 생성</h2>
       <form method="post" action="{% url 'main:create_category' %}">
         {% csrf_token %}
         <div class="mb-3">
-          <label for="category_name" class="form-label">Category Name</label>
+          <label for="category_name" class="form-label">카테고리 이름</label>
           <input
             type="text"
             name="name"
             id="category_name"
             class="form-control"
-            placeholder="Enter category name"
+            placeholder="카테고리 이름을 입력해주세요"
           />
         </div>
-        <button type="submit" class="btn btn-primary w-100">Create</button>
+        <button type="submit" class="btn btn-primary w-100">생성</button>
       </form>
     </div>
   </body>
